@@ -12,3 +12,4 @@ Installation:
 
  1. Edit the `conf` file to specify directory to save logs.
  2. Put `hoursboard-monit` in your startup script.
+ 3. Run hoursboard.py to give you screen lock details.
