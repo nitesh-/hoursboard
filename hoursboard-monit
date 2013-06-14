@@ -1,0 +1,29 @@
+#!/usr/bin/env bash
+
+# HoursBoard
+# Copyright 2013 Nitesh Morajkar
+# See LICENSE for details.
+
+# Check if file exists
+basePath=$(cat conf | head -n 1)
+
+# Make log dir if it doesn't exists
+if [ ! -d $basePath ]; then
+	mkdir -m 755 $basePath
+fi
+
+# Check if log file exists
+if [ ! -f $basePath$(date +%F).log ]; then
+    touch $basePath$(date +%F).log
+    echo "1,$(date +%s)" >> $basePath$(date +%F).log
+fi
+
+# Monitor dbus to detect screen lock/unlock event
+dbus-monitor --session "type='signal',interface='org.gnome.ScreenSaver',member='ActiveChanged'" | while read line ; do 
+    if [ x"$(echo "$line" | grep 'boolean true')" != x ] ; then 
+	echo "0,$(date +%s)" >> $basePath$(date +%F).log
+    fi
+    if [ x"$(echo "$line" | grep 'boolean false')" != x ] ; then 
+	echo "1,$(date +%s)" >> $basePath$(date +%F).log
+    fi
+done
