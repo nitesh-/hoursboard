@@ -20,10 +20,19 @@ fi
 
 # Monitor dbus to detect screen lock/unlock event
 dbus-monitor --session "type='signal',interface='org.gnome.ScreenSaver',member='ActiveChanged'" | while read line ; do 
-    if [ x"$(echo "$line" | grep 'boolean true')" != x ] ; then 
+    if [ x"$(echo "$line" | grep 'boolean true')" != x ] ; then # When log-out
 	echo "0,$(date +%s)" >> $basePath$(date +%F).log
     fi
-    if [ x"$(echo "$line" | grep 'boolean false')" != x ] ; then 
-	echo "1,$(date +%s)" >> $basePath$(date +%F).log
+    if [ x"$(echo "$line" | grep 'boolean false')" != x ] ; then # When logs-in
+    	counter=0
+    	while [ $counter -eq 0 ]
+    	do
+    		textResponse=`zenity --entry --text="Add a logout tag"`
+			if [ -n "$textResponse" ]; then
+				echo "1,$(date +%s),$textResponse" >> $basePath$(date +%F).log
+				counter=1
+				break
+			fi
+    	done
     fi
 done

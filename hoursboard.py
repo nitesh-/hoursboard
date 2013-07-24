@@ -42,26 +42,18 @@ try:
 		i = 0
 		for row in readObj:
 			if row:
-				data[i] = {row[0]: row[1]}
+				if len(row) == 3:
+					row2 = str(row[2])
+				else:
+					row2 = ''
+				data[i] = {row[0]: [row[1], row2]}
 				i=i+1
 except IOError:
 	print 'Screen Lock logs have not been found for ' + argDate + '. Seems, it was a holiday.'
 	sys.exit(0)
 
-unlockedtime = 0
-lockedtime = 0;
-
-i = 0
-
-# {{  Calculate total time system was ON
-if now.strftime("%Y-%m-%d") != datetime.datetime.fromtimestamp(int(data[len(data)-1]['1'])).strftime('%Y-%m-%d'):
-	totalTime = (int(data[len(data)-1]['1']) - int(data[0]['1']))
-else:
-	totalTime = (int(time.time()) - int(data[0]['1']))
-
-
 # {{ Convert seconds to time format
-def sec_to_time(sec):
+def secToTime(sec):
     sec = int(sec)
 
     days = sec / 86400
@@ -76,36 +68,89 @@ def sec_to_time(sec):
 # }}
 
 # {{ Calculate Screen lock time and Screen unlock time
-prev = ''
-for d in data:
-	if i != 0:
-		if i%2 == 0:
-			try:
-				if prev == '0':
-					lockedtime = lockedtime + int(data[d]['1']) - int(data[d-1]['0'])
-				prev = '1'
-			except IndexError:
-				if prev == '1':
-					unlockedtime = unlockedtime + int(data[d]['0']) - int(data[d-1]['1'])
-				prev = '0'
-		else:
-			try:
-				if prev == '1':
-					unlockedtime = unlockedtime + int(data[d]['0']) - int(data[d-1]['1'])
-				prev = '0'
-			except IndexError:
-				if prev == '0':
-					lockedtime = lockedtime + int(data[d]['1']) - int(data[d-1]['0'])
-				prev = '1'
+def parseLogs(data):
+	# Calculate total time system was ON
+	if now.strftime("%Y-%m-%d") != datetime.datetime.fromtimestamp(int(data[len(data)-1]['1'][0])).strftime('%Y-%m-%d'):
+		totalTime = (int(data[len(data)-1]['1'][0]) - int(data[0]['1'][0]))
 	else:
-		prev = '1'
-	i=i+1
+		totalTime = (int(time.time()) - int(data[0]['1'][0]))
 
-lockedTime = lockedtime
-unlockedTime = totalTime-lockedTime
+	prev = ''
+	i = 0
+	logoutTagArray = []
+	lockedTime = 0
+	unlockedTime = 0
+	for d in data:
+		if i != 0:
+			if i%2 == 0:
+				try:
+					if prev == '0':
+						lockedTime = lockedTime + int(data[d]['1'][0]) - int(data[d-1]['0'][0])
+						if data[d]['1'][1] != '':
+							logoutTagArray.append([data[d]['1'][1], int(data[d]['1'][0]) - int(data[d-1]['0'][0])]);
+					prev = '1'
+				except IndexError:
+					if prev == '1':
+						unlockedTime = unlockedTime + int(data[d]['0'][0]) - int(data[d-1]['1'][0])
+					prev = '0'
+			else:
+				try:
+					if prev == '1':
+						unlockedTime = unlockedTime + int(data[d]['0'][0]) - int(data[d-1]['1'][0])
+					prev = '0'
+				except IndexError:
+					if prev == '0':
+						lockedTime = lockedTime + int(data[d]['1'][0]) - int(data[d-1]['0'][0])
+						if data[d]['1'][1] != '':
+							logoutTagArray.append([data[d]['1'][1], int(data[d]['1'][0]) - int(data[d-1]['0'][0])])
+					prev = '1'
+		else:
+			prev = '1'
+		i=i+1
+
+	unlockedTime = totalTime-lockedTime
+	return {"time_list" : [totalTime, lockedTime, unlockedTime], "logout_tag": logoutTagArray}
+# }}
+
+# {{ Repeat provided string n times
+def repeatString_N_times(str, length):
+   return (str * ((length/len(str))+1))[:length]
+# }}
+
+# {{ Get max characters in first column
+def getMaxWidth(table):
+    """Get the maximum width of the given column index"""
+    return max([len(row[0]) for row in table])
+# }}
+
+# {{ Display Tag report
+def getTagReport(tagArray):
+	columnwidth = getMaxWidth(tagArray)
+
+	finalTagArray = []
+	for item in tagArray:
+		# item[0] - Tag name
+		# item[1] - Time in seconds
+		itemLen = len(item[0])
+		if itemLen > columnwidth:
+			diff = itemLen-columnwidth
+		else:
+			diff = columnwidth-itemLen
+		finalTagArray.append(item[0] + repeatString_N_times(" ", diff) + "  " + str(secToTime(item[1])))
+	return finalTagArray
+# }} 
+
+
+parsedData = parseLogs(data)
+finalTagArray = getTagReport(parsedData['logout_tag'])
 
 # {{ Print final stats
-print "Total time:\t" + str(sec_to_time(totalTime))
-print "Locked:\t\t" + str(sec_to_time(lockedTime))
-print "Unlocked:\t" + str(sec_to_time(unlockedTime))
+print "Total time:\t" + str(secToTime(parsedData['time_list'][0]))
+print "Locked:\t\t" + str(secToTime(parsedData['time_list'][1]))
+print "Unlocked:\t" + str(secToTime(parsedData['time_list'][2]))
+
+print "\nDetailed Tag Report\n"
+
+for tagDetail in finalTagArray:
+	print tagDetail
 
