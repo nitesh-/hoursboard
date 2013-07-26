@@ -7,6 +7,7 @@ It gives the following details:
  - Screen lock time.
  - Screen unlock time.
  - Total time computer was switched ON.
+ - Keep track of each logout by adding a Logout Tag.
 
 Installation:
 -------------
