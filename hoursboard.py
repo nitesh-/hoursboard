@@ -6,7 +6,7 @@
 
 __author__ = 'Nitesh Morajkar'
 
-import csv,time,sys,datetime
+import csv,time,sys,datetime,os
 
 print """ _    _                        ____                      _ 
 | |  | |                      |  _ \                    | |
@@ -34,7 +34,7 @@ else:
 	argDate = sys.argv[1]
 
 # {{ Open log file and parse csv
-basePath = open('conf', 'r').read()
+basePath = open(os.path.dirname(os.path.realpath(__file__)) + '/conf', 'r').read().strip()
 try:
 	with open(basePath + argDate + '.log', 'rb') as csvfile:
 		readObj = csv.reader(csvfile, delimiter=',', quotechar='|')

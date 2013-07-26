@@ -5,7 +5,8 @@
 # See LICENSE for details.
 
 # Check if file exists
-basePath=$(cat conf | head -n 1)
+dirName="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
+basePath=$(cat $dirName/conf | head -n 1)
 
 # Make log dir if it doesn't exists
 if [ ! -d $basePath ]; then
@@ -27,12 +28,12 @@ dbus-monitor --session "type='signal',interface='org.gnome.ScreenSaver',member='
     	counter=0
     	while [ $counter -eq 0 ]
     	do
-    		textResponse=`zenity --entry --text="Add a logout tag"`
-			if [ -n "$textResponse" ]; then
-				echo "1,$(date +%s),$textResponse" >> $basePath$(date +%F).log
-				counter=1
-				break
-			fi
+            textResponse=`zenity --entry --text="Add a logout tag"`
+            if [ -n "$textResponse" ]; then
+            	echo "1,$(date +%s),$textResponse" >> $basePath$(date +%F).log
+            	counter=1
+            	break
+            fi
     	done
     fi
 done
