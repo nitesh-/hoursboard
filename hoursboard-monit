@@ -6,7 +6,7 @@
 
 # Check if file exists
 dirName="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
-basePath=$(cat $dirName/conf | head -n 1)
+basePath=$(cat $dirName/conf | head -n 1 | sed 's/\/\+/\//g')
 
 # Make log dir if it doesn't exists
 if [ ! -d $basePath ]; then
@@ -16,7 +16,7 @@ fi
 # Check if log file exists
 if [ ! -f $basePath$(date +%F).log ]; then
     touch $basePath$(date +%F).log
-    echo "1,$(date +%s)" >> $basePath$(date +%F).log
+    echo "1,$(date +%s),LoggedIn" >> $basePath$(date +%F).log
 fi
 
 # Monitor dbus to detect screen lock/unlock event
@@ -26,11 +26,13 @@ dbus-monitor --session "type='signal',interface='org.gnome.ScreenSaver',member='
     fi
     if [ x"$(echo "$line" | grep 'boolean false')" != x ] ; then # When logs-in
     	counter=0
+        curDate=`date +%F`
+        curUnixTime=`date +%s`
     	while [ $counter -eq 0 ]
     	do
-            textResponse=`zenity --entry --text="Add a logout tag"`
+            textResponse=`zenity --entry --text="Add a logout tag $curDate $(date +%R)"`
             if [ -n "$textResponse" ]; then
-            	echo "1,$(date +%s),$textResponse" >> $basePath$(date +%F).log
+            	echo "1,$curUnixTime,$textResponse" >> $basePath$curDate.log
             	counter=1
             	break
             fi

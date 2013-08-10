@@ -6,7 +6,7 @@
 
 __author__ = 'Nitesh Morajkar'
 
-import csv,time,sys,datetime,os
+import csv,time,sys,datetime,os,re
 
 print """ _    _                        ____                      _ 
 | |  | |                      |  _ \                    | |
@@ -34,7 +34,8 @@ else:
 	argDate = sys.argv[1]
 
 # {{ Open log file and parse csv
-basePath = open(os.path.dirname(os.path.realpath(__file__)) + '/conf', 'r').read().strip()
+basePath = re.sub('/+', '/', open(os.path.dirname(os.path.realpath(__file__)) + '/conf', 'r').read().strip() + '/')
+
 try:
 	with open(basePath + argDate + '.log', 'rb') as csvfile:
 		readObj = csv.reader(csvfile, delimiter=',', quotechar='|')
@@ -142,15 +143,15 @@ def getTagReport(tagArray):
 
 
 parsedData = parseLogs(data)
-finalTagArray = getTagReport(parsedData['logout_tag'])
 
 # {{ Print final stats
 print "Total time:\t" + str(secToTime(parsedData['time_list'][0]))
 print "Locked:\t\t" + str(secToTime(parsedData['time_list'][1]))
 print "Unlocked:\t" + str(secToTime(parsedData['time_list'][2]))
 
-print "\nDetailed Tag Report\n"
-
-for tagDetail in finalTagArray:
-	print tagDetail
+if parsedData['logout_tag']:
+	print "\nDetailed Tag Report\n"
+	finalTagArray = getTagReport(parsedData['logout_tag'])
+	for tagDetail in finalTagArray:
+		print tagDetail
 
