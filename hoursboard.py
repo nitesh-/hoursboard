@@ -71,10 +71,14 @@ def secToTime(sec):
 # {{ Calculate Screen lock time and Screen unlock time
 def parseLogs(data):
 	# Calculate total time system was ON
-	if now.strftime("%Y-%m-%d") != datetime.datetime.fromtimestamp(int(data[len(data)-1]['1'][0])).strftime('%Y-%m-%d'):
-		totalTime = (int(data[len(data)-1]['1'][0]) - int(data[0]['1'][0]))
-	else:
-		totalTime = (int(time.time()) - int(data[0]['1'][0]))
+	try:
+		if now.strftime("%Y-%m-%d") != datetime.datetime.fromtimestamp(int(data[len(data)-1]['1'][0])).strftime('%Y-%m-%d'):
+			totalTime = (int(data[len(data)-1]['1'][0]) - int(data[0]['1'][0]))
+		else:
+			totalTime = (int(time.time()) - int(data[0]['1'][0]))
+	except KeyError:
+		print "Seems you forgot to tag your logout."
+		sys.exit(0)
 
 	prev = ''
 	i = 0

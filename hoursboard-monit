@@ -17,6 +17,11 @@ fi
 if [ ! -f $basePath$(date +%F).log ]; then
     touch $basePath$(date +%F).log
     echo "1,$(date +%s),LoggedIn" >> $basePath$(date +%F).log
+else
+    lastCount=`tail -n 1 $basePath$(date +%F).log | awk -F "," '{print $1}'`
+    if [ $lastCount == 0 ]; then
+        echo "1,$(date +%s),LoggedInAgain" >> $basePath$(date +%F).log
+    fi
 fi
 
 # Monitor dbus to detect screen lock/unlock event
