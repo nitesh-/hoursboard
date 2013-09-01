@@ -1,3 +1,4 @@
+
 HoursBoard
 ==========
 HoursBoard is a tool to generate details about how much time your screen was locked.
