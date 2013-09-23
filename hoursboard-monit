@@ -27,20 +27,21 @@ fi
 # Monitor dbus to detect screen lock/unlock event
 dbus-monitor --session "type='signal',interface='org.gnome.ScreenSaver',member='ActiveChanged'" | while read line ; do 
     if [ x"$(echo "$line" | grep 'boolean true')" != x ] ; then # When log-out
-	echo "0,$(date +%s)" >> $basePath$(date +%F).log
+	   echo "0,$(date +%s)" >> $basePath$(date +%F).log
     fi
     if [ x"$(echo "$line" | grep 'boolean false')" != x ] ; then # When logs-in
-    	counter=0
         curDate=`date +%F`
         curUnixTime=`date +%s`
-    	while [ $counter -eq 0 ]
-    	do
-            textResponse=`zenity --entry --text="Add a logout tag $curDate $(date +%R)"`
-            if [ -n "$textResponse" ]; then
-            	echo "1,$curUnixTime,$textResponse" >> $basePath$curDate.log
-            	counter=1
-            	break
-            fi
-    	done
+    	
+        textResponse=`zenity --entry --text="Add a logout tag $curDate $(date +%R)"`
+        textResponse=`echo $textResponse |  sed 's/^ *//g' | sed 's/ *$//g'` # Remove whitespaces
+
+        # If textResponse is not empty
+        if [ -n "$textResponse" ]; then
+        	echo "1,$curUnixTime,$textResponse" >> $basePath$curDate.log
+        # Else if empty then don't log as well as remove logout entry
+        else
+            sed '$d' $basePath$curDate.log > $basePath$curDate-tmp.log && mv $basePath$curDate-tmp.log $basePath$curDate.log
+        fi
     fi
 done

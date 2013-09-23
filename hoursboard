@@ -1,0 +1,21 @@
+#!/bin/bash
+### BEGIN INIT INFO
+# Provides:          hoursboard
+### END INIT INFO
+
+case $1 in
+    start)
+    bash /home/nitesh/hoursboard/hoursboard-monit >/dev/null &
+    ;;
+    stop)
+        ps aux | grep hoursboard | awk '{print $2}' | xargs kill -9 > /dev/null 2>&1
+    ;;
+    restart)
+    /etc/init.d/hoursboard stop
+    sleep 1
+    /etc/init.d/hoursboard start
+        ;;
+        *)
+        echo "Usage : $0 [ start | stop | restart ] "
+        ;;
+esac
