@@ -9,6 +9,7 @@ It gives the following details:
  - Screen unlock time.
  - Total time computer was switched ON.
  - Keep track of each logout by adding a Logout Tag.
+ - If you don't wish to count a particular logout, don't provide a logout tag.
 
 Installation:
 -------------
