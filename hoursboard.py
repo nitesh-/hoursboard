@@ -47,8 +47,13 @@ try:
 					row2 = str(row[2])
 				else:
 					row2 = ''
-				data[i] = {row[0]: [row[1], row2]}
-				i=i+1
+				# Discard all entries with flag '2'
+				if row[0] != '2':
+					data[i] = {row[0]: [row[1], row2]}
+					i=i+1
+				else:
+					i=i-1
+					del row[i]
 except IOError:
 	print 'Screen Lock logs have not been found for ' + argDate + '. Seems, it was a holiday.'
 	sys.exit(0)

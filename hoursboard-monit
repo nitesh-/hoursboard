@@ -39,9 +39,9 @@ dbus-monitor --session "type='signal',interface='org.gnome.ScreenSaver',member='
         # If textResponse is not empty
         if [ -n "$textResponse" ]; then
         	echo "1,$curUnixTime,$textResponse" >> $basePath$curDate.log
-        # Else if empty then don't log as well as remove logout entry
+        # Else if empty then add a "don't count tag"
         else
-            sed '$d' $basePath$curDate.log > $basePath$curDate-tmp.log && mv $basePath$curDate-tmp.log $basePath$curDate.log
+            echo "2,$curUnixTime,dc" >> $basePath$curDate.log
         fi
     fi
 done
