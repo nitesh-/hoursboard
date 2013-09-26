@@ -53,7 +53,7 @@ try:
 					i=i+1
 				else:
 					i=i-1
-					del row[i]
+					del data[i]
 except IOError:
 	print 'Screen Lock logs have not been found for ' + argDate + '. Seems, it was a holiday.'
 	sys.exit(0)
