@@ -32,14 +32,21 @@ dbus-monitor --session "type='signal',interface='org.gnome.ScreenSaver',member='
     if [ x"$(echo "$line" | grep 'boolean false')" != x ] ; then # When logs-in
         curDate=`date +%F`
         curUnixTime=`date +%s`
+    	counter=0
     	
-        textResponse=`zenity --entry --text="Add a logout tag $curDate $(date +%R)"`
-
-        # If textResponse contains space, then log it as flag 2
-        if [ "$textResponse" == " " ]; then
-        	echo "2,$curUnixTime,dc" >> $basePath$curDate.log	
-        elif [ -n "$textResponse" ]; then
-        	echo "1,$curUnixTime,$textResponse" >> $basePath$curDate.log
-	fi
+    	while [ $counter -eq 0 ]
+     	do
+	        textResponse=`zenity --entry --text="Add a logout tag $curDate $(date +%R)"`
+	        # If textResponse contains space, then log it as flag 2
+	        if [ "$textResponse" == " " ]; then
+	        	echo "2,$curUnixTime,dc" >> $basePath$curDate.log
+	        	counter=1
+	        	break
+	        elif [ -n "$textResponse" ]; then
+	        	echo "1,$curUnixTime,$textResponse" >> $basePath$curDate.log
+	        	counter=1
+	        	break
+	        fi
+        done
     fi
 done
