@@ -7,6 +7,8 @@
 __author__ = 'Nitesh Morajkar'
 
 import csv,time,sys,datetime,os,re
+import subprocess
+from subprocess import Popen, PIPE, STDOUT
 
 print """ _    _                        ____                      _ 
 | |  | |                      |  _ \                    | |
@@ -77,8 +79,24 @@ def secToTime(sec):
 def parseLogs(data):
 	# Calculate total time system was ON
 	try:
+		# if date is less than current date
 		if now.strftime("%Y-%m-%d") != datetime.datetime.fromtimestamp(int(data[len(data)-1]['1'][0])).strftime('%Y-%m-%d'):
-			totalTime = (int(data[len(data)-1]['1'][0]) - int(data[0]['1'][0]))
+			cmd1 = ["last", "-t", str(argDate.replace("-", ""))+"235950"] # Get last shutdown
+			cmd2 = ["head", "-n", "1"] # Get First line
+			cmd3 = ["awk" , "-F", " - " ,"{print $2}"] # awk by '-'
+			cmd4 = ["awk" , "{print $1}"] # Get the L.H.S
+			p1 = Popen(cmd1, stdout=PIPE)
+			p2 = Popen(cmd2, stdin=p1.stdout, stdout=PIPE)
+			p3 = Popen(cmd3, stdin=p2.stdout, stdout=PIPE)
+			p4 = Popen(cmd4, stdin=p3.stdout, stdout=PIPE)
+			output = p4.communicate()[0].strip()
+			if output != '':
+				dt = argDate + " " + str(output)
+				timeTemp = int(datetime.datetime.strptime(dt, '%Y-%m-%d %H:%M').strftime("%s"))
+				totalTime = timeTemp - int(data[0]['1'][0])
+			else:
+				print "Screen log information can't be found."
+				sys.exit(0)
 		else:
 			totalTime = (int(time.time()) - int(data[0]['1'][0]))
 	except KeyError:
